@@ -22,7 +22,7 @@ router.use("/booking", bookingController);
 router.use("/banner", bannerController);
 router.use("/address", addressController);
 router.use("/support", supportController);
-router.use("/vendor", venderController);
+router.use("/vender", venderController);
 
 
 module.exports = router;
