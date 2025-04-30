@@ -240,7 +240,7 @@ venderController.post("/login", async (req, res) => {
     }
     return sendResponse(res, 200, "Success", {
       message: "Vender logged in successfully",
-      data: user,
+      data: userDetails,
       statusCode: 200,
     });
   } catch (error) {
