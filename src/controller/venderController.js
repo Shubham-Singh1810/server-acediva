@@ -175,7 +175,7 @@ venderController.post("/register", async (req, res) => {
     if (userDetails) {
       return sendResponse(res, 200, "Success", {
         message: "Email or phone number already exists",
-        data: vender,
+        data: userDetails,
         statusCode: 200,
       });
     }
