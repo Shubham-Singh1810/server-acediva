@@ -34,7 +34,10 @@ venderController.post("/send-otp", async (req, res) => {
       });
 
       // Generate JWT token for the new user
-      const token = jwt.sign({ userId: user._id, phoneNumber: user.phoneNumber }, process.env.JWT_KEY);
+      const token = jwt.sign(
+        { userId: user._id, phoneNumber: user.phoneNumber },
+        process.env.JWT_KEY
+      );
       // Store the token in the user object or return it in the response
       user.token = token;
       user = await Vender.findByIdAndUpdate(user.id, { token }, { new: true });
@@ -78,11 +81,12 @@ venderController.post("/send-otp", async (req, res) => {
 venderController.post("/otp-verification", async (req, res) => {
   try {
     const { phoneNumber, otp } = req.body;
-    const user = await Vender.findOne({ phoneNumber: phoneNumber, otp: otp });
+    const user = await Vender.findOne({ phoneNumber: phoneNumber, otp: otp , });
     if (user) {
+       const updatedUser = await Vender.findByIdAndUpdate(user.id, { isPhoneNumberVerified : true , profileStatus: "completed",}, { new: true });
       return sendResponse(res, 200, "Success", {
         message: "OTP verified successfully",
-        data: user,
+        data: updatedUser,
         statusCode: 200,
       });
     } else {
@@ -114,13 +118,16 @@ venderController.put("/update", upload.single("image"), async (req, res) => {
     }
     // Handle image upload if a new image is provided
     if (req.file) {
-      let image = await cloudinary.uploader.upload(req.file.path, function (err, result) {
-        if (err) {
-          return err;
-        } else {
-          return result;
+      let image = await cloudinary.uploader.upload(
+        req.file.path,
+        function (err, result) {
+          if (err) {
+            return err;
+          } else {
+            return result;
+          }
         }
-      });
+      );
       updatedData = { ...req.body, image: image.url };
     }
     // Update the user in the database
@@ -142,7 +149,14 @@ venderController.put("/update", upload.single("image"), async (req, res) => {
 });
 venderController.post("/list", async (req, res) => {
   try {
-    const { searchKey = "", status, pageNo = 1, pageCount = 10, sortByField, sortByOrder } = req.body;
+    const {
+      searchKey = "",
+      status,
+      pageNo = 1,
+      pageCount = 10,
+      sortByField,
+      sortByOrder,
+    } = req.body;
     const query = {};
     if (status) query.profileStatus = status;
     if (searchKey) query.firstName = { $regex: searchKey, $options: "i" };
@@ -154,11 +168,17 @@ venderController.post("/list", async (req, res) => {
       .limit(parseInt(pageCount))
       .skip(parseInt(pageNo - 1) * parseInt(pageCount));
     const totalCount = await Vender.countDocuments({});
-    const activeCount = await Vender.countDocuments({ profileStatus: "completed" });
+    const activeCount = await Vender.countDocuments({
+      profileStatus: "completed",
+    });
     sendResponse(res, 200, "Success", {
       message: "Vender list retrieved successfully!",
       data: userList,
-      documentCount: { totalCount, activeCount, inactiveCount: totalCount - activeCount },
+      documentCount: {
+        totalCount,
+        activeCount,
+        inactiveCount: totalCount - activeCount,
+      },
       statusCode: 200,
     });
   } catch (error) {
@@ -171,7 +191,10 @@ venderController.post("/list", async (req, res) => {
 });
 venderController.post("/register", async (req, res) => {
   try {
-    let userDetails = await Vender.findOne({ phoneNumber: req?.body?.phoneNumber, email: req?.body?.email });
+    let userDetails = await Vender.findOne({
+      phoneNumber: req?.body?.phoneNumber,
+      email: req?.body?.email,
+    });
     if (userDetails) {
       return sendResponse(res, 200, "Success", {
         message: "Email or phone number already exists",
@@ -179,7 +202,7 @@ venderController.post("/register", async (req, res) => {
         statusCode: 200,
       });
     }
-    
+
     let user;
     if (!userDetails) {
       const otp = generateOTP();
@@ -187,11 +210,11 @@ venderController.post("/register", async (req, res) => {
 
       const otpMessage = `<#> ${otp} is your OTP for verification. Do not share it with anyone.\n${appHash}`;
       let optResponse = await axios.post(
-        `https://api.authkey.io/request?authkey=${process.env.AUTHKEY_API_KEY}&mobile=${
-          req.body.phoneNumber
-        }&country_code=91&sid=${process.env.AUTHKEY_SENDER_ID}&company=Acediva&otp=${otp}&message=${encodeURIComponent(
-          otpMessage
-        )}`
+        `https://api.authkey.io/request?authkey=${
+          process.env.AUTHKEY_API_KEY
+        }&mobile=${req.body.phoneNumber}&country_code=91&sid=${
+          process.env.AUTHKEY_SENDER_ID
+        }&company=Acediva&otp=${otp}&message=${encodeURIComponent(otpMessage)}`
       );
       // Create a new user with the provided details and OTP
       user = await Vender.create({
@@ -200,7 +223,10 @@ venderController.post("/register", async (req, res) => {
       });
 
       // Generate JWT token for the new user
-      const token = jwt.sign({ userId: user._id, phoneNumber: user.phoneNumber }, process.env.JWT_KEY);
+      const token = jwt.sign(
+        { userId: user._id, phoneNumber: user.phoneNumber },
+        process.env.JWT_KEY
+      );
       // Store the token in the user object or return it in the response
       user.token = token;
       user = await Vender.findByIdAndUpdate(user.id, { token }, { new: true });
@@ -219,30 +245,47 @@ venderController.post("/register", async (req, res) => {
 });
 venderController.post("/login", async (req, res) => {
   try {
-    let userDetails = await Vender.findOne({ phoneNumber: req?.body?.phoneNumber, password: req?.body?.password });
-    if (!userDetails?.isPhoneNumberVerified) {
-      const otp = generateOTP();
-      const appHash = "ems/3nG2V1H"; 
-
-      const otpMessage = `<#> ${otp} is your OTP for verification. Do not share it with anyone.\n${appHash}`;
-      let optResponse = await axios.post(
-        `https://api.authkey.io/request?authkey=${process.env.AUTHKEY_API_KEY}&mobile=${
-          req.body.phoneNumber
-        }&country_code=91&sid=${process.env.AUTHKEY_SENDER_ID}&company=Acediva&otp=${otp}&message=${encodeURIComponent(
-          otpMessage
-        )}`
-      );
-      user = await Vender.findByIdAndUpdate(user.id, { otp }, { new: true });
+    let userDetails = await Vender.findOne({
+      phoneNumber: req?.body?.phoneNumber,
+      password: req?.body?.password,
+    });
+    if (userDetails) {
+      if (!userDetails?.isPhoneNumberVerified) {
+        const otp = generateOTP();
+        const appHash = "ems/3nG2V1H";
+        const otpMessage = `<#> ${otp} is your OTP for verification. Do not share it with anyone.\n${appHash}`;
+        let optResponse = await axios.post(
+          `https://api.authkey.io/request?authkey=${
+            process.env.AUTHKEY_API_KEY
+          }&mobile=${req.body.phoneNumber}&country_code=91&sid=${
+            process.env.AUTHKEY_SENDER_ID
+          }&company=Acediva&otp=${otp}&message=${encodeURIComponent(
+            otpMessage
+          )}`
+        );
+        let user = await Vender.findByIdAndUpdate(
+          user.id,
+          { otp },
+          { new: true }
+        );
+        return sendResponse(res, 200, "Success", {
+          message:
+            "Please verify your phone number , Otp has been send to your phone",
+          statusCode: 401,
+        });
+      }
       return sendResponse(res, 200, "Success", {
-        message: "Please verify your phone number , Otp has been send to your phone",
-        statusCode: 401,
+        message: "Vender logged in successfully",
+        data: userDetails,
+        statusCode: 200,
+      });
+    } else {
+      return sendResponse(res, 200, "Success", {
+        message: "Invalid Credientials",
+
+        statusCode: 403,
       });
     }
-    return sendResponse(res, 200, "Success", {
-      message: "Vender logged in successfully",
-      data: userDetails,
-      statusCode: 200,
-    });
   } catch (error) {
     return sendResponse(res, 500, "Failed", {
       message: error.message || "Internal server error.",
