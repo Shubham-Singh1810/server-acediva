@@ -282,13 +282,35 @@ venderController.post("/login", async (req, res) => {
     } else {
       return sendResponse(res, 200, "Success", {
         message: "Invalid Credientials",
-
         statusCode: 403,
       });
     }
   } catch (error) {
     return sendResponse(res, 500, "Failed", {
       message: error.message || "Internal server error.",
+      statusCode: 500,
+    });
+  }
+});
+venderController.post("/details/:id", async (req, res) => {
+  try {
+    const id = req?.params?.id
+    if(!id){
+      sendResponse(res, 200, "Success", {
+        message: "Vendor id is not provided",
+        statusCode: 404,
+      });
+    }
+    let vendorDetails = await Vender.findOne({_id:req?.params?.id})
+    sendResponse(res, 200, "Success", {
+      message: "Vender details retrieved successfully!",
+      data: vendorDetails,
+      statusCode: 200,
+    });
+  } catch (error) {
+    console.error(error);
+    sendResponse(res, 500, "Failed", {
+      message: error.message || "Internal server error",
       statusCode: 500,
     });
   }
