@@ -2,6 +2,10 @@ const express = require("express");
 const { sendResponse, generateOTP } = require("../utils/common");
 require("dotenv").config();
 const Vender = require("../model/vender.Schema");
+const Booking = require("../model/booking.Schema");
+const Service = require("../model/service.Schema");
+const Repair = require("../model/repair.Schema");
+const Installation = require("../model/installation.Schema");
 const venderController = express.Router();
 const axios = require("axios");
 require("dotenv").config();
@@ -338,6 +342,38 @@ venderController.delete("/delete/:id", async (req, res) => {
     console.error(error);
     sendResponse(res, 500, "Failed", {
       message: error.message || "Internal server error",
+    });
+  }
+});
+venderController.get("/my-list/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const bookingList = await Booking.find({ venderId: id});
+    const updatedBookingList = await Promise.all(
+      bookingList.map(async (v) => {
+        let serviceDetails = null;
+        let userDetails = null;
+        if (v?.serviceType == "service") {
+          serviceDetails = await Service.findOne({ _id: v?.serviceId });
+        } else if (v?.serviceType == "repair") {
+          serviceDetails = await Repair.findOne({ _id: v?.serviceId });
+        } else if (v?.serviceType == "installation") {
+          serviceDetails = await Installation.findOne({ _id: v?.serviceId });
+        }
+        userDetails = await User.findOne({ _id: v?.userId });
+        return { ...v.toObject(), serviceDetails, userDetails };
+      })
+    );
+    sendResponse(res, 200, "Success", {
+      message: "Booking list retrieved successfully!",
+      data: updatedBookingList,
+      statusCode: 200,
+    });
+  } catch (error) {
+    console.error(error);
+    sendResponse(res, 500, "Failed", {
+      message: error.message || "Internal server error",
+      statusCode: 500,
     });
   }
 });
