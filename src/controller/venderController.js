@@ -81,9 +81,13 @@ venderController.post("/send-otp", async (req, res) => {
 venderController.post("/otp-verification", async (req, res) => {
   try {
     const { phoneNumber, otp } = req.body;
-    const user = await Vender.findOne({ phoneNumber: phoneNumber, otp: otp , });
+    const user = await Vender.findOne({ phoneNumber: phoneNumber, otp: otp });
     if (user) {
-       const updatedUser = await Vender.findByIdAndUpdate(user.id, { isPhoneNumberVerified : true , profileStatus: "completed",}, { new: true });
+      const updatedUser = await Vender.findByIdAndUpdate(
+        user.id,
+        { isPhoneNumberVerified: true, profileStatus: "completed" },
+        { new: true }
+      );
       return sendResponse(res, 200, "Success", {
         message: "OTP verified successfully",
         data: updatedUser,
@@ -294,14 +298,14 @@ venderController.post("/login", async (req, res) => {
 });
 venderController.post("/details/:id", async (req, res) => {
   try {
-    const id = req?.params?.id
-    if(!id){
+    const id = req?.params?.id;
+    if (!id) {
       sendResponse(res, 200, "Success", {
         message: "Vendor id is not provided",
         statusCode: 404,
       });
     }
-    let vendorDetails = await Vender.findOne({_id:req?.params?.id})
+    let vendorDetails = await Vender.findOne({ _id: req?.params?.id });
     sendResponse(res, 200, "Success", {
       message: "Vender details retrieved successfully!",
       data: vendorDetails,
@@ -312,6 +316,28 @@ venderController.post("/details/:id", async (req, res) => {
     sendResponse(res, 500, "Failed", {
       message: error.message || "Internal server error",
       statusCode: 500,
+    });
+  }
+});
+venderController.delete("/delete/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const vender = await Vender.findById(id);
+    if (!vender) {
+      return sendResponse(res, 404, "Failed", {
+        message: "Vendor not found",
+      });
+    }
+
+    await Vender.findByIdAndDelete(id);
+    sendResponse(res, 200, "Success", {
+      message: "Vendor Deleted Successfully",
+      statusCode: 200,
+    });
+  } catch (error) {
+    console.error(error);
+    sendResponse(res, 500, "Failed", {
+      message: error.message || "Internal server error",
     });
   }
 });
