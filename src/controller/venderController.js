@@ -220,9 +220,9 @@ venderController.post("/register", async (req, res) => {
 venderController.post("/login", async (req, res) => {
   try {
     let userDetails = await Vender.findOne({ phoneNumber: req?.body?.phoneNumber, password: req?.body?.password });
-    if (userDetails?.isPhoneNumberVerified) {
+    if (!userDetails?.isPhoneNumberVerified) {
       const otp = generateOTP();
-      const appHash = "ems/3nG2V1H"; // Apne app ka actual hash yahan dalein
+      const appHash = "ems/3nG2V1H"; 
 
       const otpMessage = `<#> ${otp} is your OTP for verification. Do not share it with anyone.\n${appHash}`;
       let optResponse = await axios.post(

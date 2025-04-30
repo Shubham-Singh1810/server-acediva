@@ -42,9 +42,9 @@ const venderSchema = mongoose.Schema({
   },
   profileStatus:{
     type: String,
-    default: "incompleted",
+    default: "approved",
     required: true,
-      enum: ["incompleted", "completed"],
+      enum: ["incompleted", "completed", "approved"],
   },
 });
 
