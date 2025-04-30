@@ -345,7 +345,7 @@ venderController.delete("/delete/:id", async (req, res) => {
     });
   }
 });
-venderController.get("/my-list/:id", async (req, res) => {
+venderController.get("/my-booking/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const bookingList = await Booking.find({ venderId: id});
