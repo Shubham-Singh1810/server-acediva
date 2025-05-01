@@ -141,7 +141,7 @@ userController.post("/admin-login", async (req, res) => {
       const token = jwt.sign({ userId: user._id, phoneNumber: user.phoneNumber }, process.env.JWT_KEY);
       // Store the token in the user object or return it in the response
       user.token = token;
-      user = await User.findByIdAndUpdate(user.id, { token }, { new: true });
+      user = await User.findByIdAndUpdate(user.id, { token , deviceId: req?.body?.deviceId }, { new: true });
       return sendResponse(res, 200, "Success", {
         message: "Admin logged in successfully",
         data: user,

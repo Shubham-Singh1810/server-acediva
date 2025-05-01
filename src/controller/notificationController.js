@@ -101,4 +101,32 @@ notificationController.delete("/delete/:id", async (req, res) => {
   }
 });
 
+notificationController.post("/create", async (req, res) => {
+  try {
+    sendNotification({
+      icon: "https://cdn-icons-png.flaticon.com/128/3177/3177440.png",
+      title: ` has verified their phone number`,
+      subTitle: ` has verified their phone number`,
+      notifyUserId: "kjfnkdf",
+      category: "Vendor",
+      subCategory: "Verification",
+      notifyUser: "Admin",
+      fcmToken:"fCBfyfuaAl0FeG6e93S5mc:APA91bEWMG6tNIshaebx07iOP3lD537F-QOdgn_Wcl7unSBhjeuUzLNnUZccLDdbjb9ff-hg47alk9rJT-9bNYK_AwGaaGknvXgAgyMfkuo090qOjfEfTys"
+    });
+   
+   
+    sendResponse(res, 200, "Success", {
+      message: "Notification send successfully",
+  
+      statusCode: 200,
+    });
+  } catch (error) {
+    console.error(error);
+    sendResponse(res, 500, "Failed", {
+      message: error.message || "Internal server error",
+      statusCode: 500,
+    });
+  }
+});
+
 module.exports = notificationController;

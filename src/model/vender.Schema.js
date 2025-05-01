@@ -46,6 +46,9 @@ const venderSchema = mongoose.Schema({
     required: true,
       enum: ["incompleted", "completed", "approved"],
   },
+  deviceId: {
+    type: String,
+  },
 });
 
 venderSchema.plugin(timestamps);

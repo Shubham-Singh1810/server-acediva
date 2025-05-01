@@ -58,7 +58,9 @@ const userSchema = mongoose.Schema({
       },
     },
   ],
- 
+  deviceId: {
+    type: String,
+  },
 });
 
 userSchema.plugin(timestamps);
