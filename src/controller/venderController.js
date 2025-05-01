@@ -288,7 +288,8 @@ venderController.post("/login", async (req, res) => {
         return sendResponse(res, 200, "Success", {
           message:
             "Please verify your phone number , Otp has been send to your phone",
-          statusCode: 200,
+            statusCode: 200,
+            data : userDetails
         });
       }
       return sendResponse(res, 200, "Success", {
