@@ -12,6 +12,7 @@ require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const cloudinary = require("../utils/cloudinary");
 const upload = require("../utils/multer");
+const { sendNotification } = require("../utils/sendNotification");
 
 venderController.post("/send-otp", async (req, res) => {
   try {
@@ -121,9 +122,7 @@ venderController.put("/update", upload.single("image"), async (req, res) => {
       });
     }
     let updatedData = { ...req.body };
-    if (req.body.firstName && req.body.lastName && req.body.email) {
-      updatedData = { ...req.body, profileStatus: "completed" };
-    }
+    
     // Handle image upload if a new image is provided
     if (req.file) {
       let image = await cloudinary.uploader.upload(
@@ -177,7 +176,7 @@ venderController.post("/list", async (req, res) => {
       .skip(parseInt(pageNo - 1) * parseInt(pageCount));
     const totalCount = await Vender.countDocuments({});
     const activeCount = await Vender.countDocuments({
-      profileStatus: "completed",
+      profileStatus: "approved",
     });
     sendResponse(res, 200, "Success", {
       message: "Vender list retrieved successfully!",
@@ -239,6 +238,16 @@ venderController.post("/register", async (req, res) => {
       user.token = token;
       user = await Vender.findByIdAndUpdate(user.id, { token }, { new: true });
     }
+    sendNotification({
+      icon: "https://cdn-icons-png.flaticon.com/128/3177/3177440.png",
+      title: `${user.firstName} has verified their phone number`,
+      subTitle: `${user.firstName} has verified their phone number`,
+      notifyUserId: user?._id,
+      category: "Vendor",
+      subCategory: "Verification",
+      notifyUser: "Admin",
+      fcmToken:"fCBfyfuaAl0FeG6e93S5mc:APA91bEWMG6tNIshaebx07iOP3lD537F-QOdgn_Wcl7unSBhjeuUzLNnUZccLDdbjb9ff-hg47alk9rJT-9bNYK_AwGaaGknvXgAgyMfkuo090qOjfEfTys"
+    });
     return sendResponse(res, 200, "Success", {
       message: "Vender registered  successfully",
       data: user,

@@ -11,6 +11,7 @@ const bannerController = require("./controller/bannerController");
 const addressController = require("./controller/addressController");
 const supportController = require("./controller/supportController");
 const venderController = require("./controller/venderController");
+const notificationController = require("./controller/notificationController");
 
 router.use("/user", userController);
 router.use("/category", categoryController);
@@ -23,6 +24,7 @@ router.use("/banner", bannerController);
 router.use("/address", addressController);
 router.use("/support", supportController);
 router.use("/vendor", venderController);
+router.use("/notification", notificationController);
 
 
 module.exports = router;
