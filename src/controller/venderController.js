@@ -281,14 +281,14 @@ venderController.post("/login", async (req, res) => {
           )}`
         );
         let user = await Vender.findByIdAndUpdate(
-          user.id,
+          userDetails._id,
           { otp },
           { new: true }
         );
         return sendResponse(res, 200, "Success", {
           message:
             "Please verify your phone number , Otp has been send to your phone",
-          statusCode: 401,
+          statusCode: 200,
         });
       }
       return sendResponse(res, 200, "Success", {
