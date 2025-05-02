@@ -6,6 +6,7 @@ const Booking = require("../model/booking.Schema");
 const Service = require("../model/service.Schema");
 const Repair = require("../model/repair.Schema");
 const Installation = require("../model/installation.Schema");
+const User = require("../model/user.Schema");
 const venderController = express.Router();
 const axios = require("axios");
 require("dotenv").config();
