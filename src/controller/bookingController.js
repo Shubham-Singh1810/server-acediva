@@ -248,7 +248,7 @@ bookingController.post("/cancel/:id", async (req, res) => {
     }
     const updatedBooking = await Booking.findByIdAndUpdate(
       id,
-      { canceledBy : req?.body?.canceledBy, cancelationReason:req?.body?.cancelationReason },
+      { canceledBy : req?.body?.canceledBy, cancelationReason:req?.body?.cancelationReason , bookingStatus:"cancel"},
       {
         new: true, 
       }
