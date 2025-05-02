@@ -82,6 +82,13 @@ const bookingSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Vender",
   }, 
+  canceledBy: {
+    type: String,
+    enum: ["user", "vendor", "admin"], 
+  },
+  cancelationReason: {
+    type: String,
+  }
 });
 
 bookingSchema.plugin(timestamps);
