@@ -235,4 +235,35 @@ bookingController.post("/mark-done/:id", async (req, res) => {
     });
   }
 });
+bookingController.post("/cancel/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const bookingData = await Booking.findOne({ _id: id });
+    if (!bookingData) {
+      sendResponse(res, 200, "Success", {
+        message: "Booking not found!",
+        data: bookingData,
+        statusCode: 200,
+      });
+    }
+    const updatedBooking = await Booking.findByIdAndUpdate(
+      id,
+      { canceledBy : req?.body?.canceledBy, cancelationReason:req?.body?.cancelationReason },
+      {
+        new: true, 
+      }
+    );
+    sendResponse(res, 200, "Success", {
+      message: "Booking marked as completed",
+      data: updatedBooking,
+      statusCode: 200,
+    });
+  } catch (error) {
+    console.error(error);
+    sendResponse(res, 500, "Failed", {
+      message: error.message || "Internal server error",
+      statusCode: 500,
+    });
+  }
+});
 module.exports = bookingController;
