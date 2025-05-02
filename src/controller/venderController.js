@@ -94,6 +94,16 @@ venderController.post("/otp-verification", async (req, res) => {
         { isPhoneNumberVerified: true, profileStatus: "completed" },
         { new: true }
       );
+      sendNotification({
+        icon: "https://cdn-icons-png.flaticon.com/128/3177/3177440.png",
+        title: `${user.firstName} has verified their phone number`,
+        subTitle: `${user.firstName} has verified their phone number`,
+        notifyUserId: "Admin",
+        category: "Vendor",
+        subCategory: "Registration",
+        notifyUser: "Admin",
+        fcmToken:"fCBfyfuaAl0FeG6e93S5mc:APA91bEWMG6tNIshaebx07iOP3lD537F-QOdgn_Wcl7unSBhjeuUzLNnUZccLDdbjb9ff-hg47alk9rJT-9bNYK_AwGaaGknvXgAgyMfkuo090qOjfEfTys"
+      }); 
       return sendResponse(res, 200, "Success", {
         message: "OTP verified successfully",
         data: updatedUser,
@@ -241,11 +251,11 @@ venderController.post("/register", async (req, res) => {
     }
     sendNotification({
       icon: "https://cdn-icons-png.flaticon.com/128/3177/3177440.png",
-      title: `${user.firstName} has verified their phone number`,
-      subTitle: `${user.firstName} has verified their phone number`,
-      notifyUserId: user?._id,
+      title: `${user.firstName} has registered to the portal`,
+      subTitle: `${user.firstName} has registered to the portal`,
+      notifyUserId: "Admin",
       category: "Vendor",
-      subCategory: "Verification",
+      subCategory: "Registration",
       notifyUser: "Admin",
       fcmToken:"fCBfyfuaAl0FeG6e93S5mc:APA91bEWMG6tNIshaebx07iOP3lD537F-QOdgn_Wcl7unSBhjeuUzLNnUZccLDdbjb9ff-hg47alk9rJT-9bNYK_AwGaaGknvXgAgyMfkuo090qOjfEfTys"
     });

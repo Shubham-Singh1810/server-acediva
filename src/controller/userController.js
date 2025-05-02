@@ -22,14 +22,12 @@ const Support = require("../model/support.Schema");
 userController.post("/send-otp", async (req, res) => {
   try {
     const { phoneNumber, ...otherDetails } = req.body;
-    // Check if the phone number is provided
     if (!phoneNumber) {
       return sendResponse(res, 400, "Failed", {
         message: "Phone number is required.",
         statusCode: 400,
       });
     }
-    // Generate OTP
     const otp = generateOTP();
 
     // Check if the user exists
@@ -44,9 +42,23 @@ userController.post("/send-otp", async (req, res) => {
       });
 
       // Generate JWT token for the new user
-      const token = jwt.sign({ userId: user._id, phoneNumber: user.phoneNumber }, process.env.JWT_KEY);
+      const token = jwt.sign(
+        { userId: user._id, phoneNumber: user.phoneNumber },
+        process.env.JWT_KEY
+      );
       // Store the token in the user object or return it in the response
       user.token = token;
+      sendNotification({
+        icon: "https://cdn-icons-png.flaticon.com/128/3177/3177440.png",
+        title: `A new user has registered to the portal`,
+        subTitle: `A new user has registered to the portal`,
+        notifyUserId: "Admin",
+        category: "User",
+        subCategory: "Registration",
+        notifyUser: "Admin",
+        fcmToken:
+          "fCBfyfuaAl0FeG6e93S5mc:APA91bEWMG6tNIshaebx07iOP3lD537F-QOdgn_Wcl7unSBhjeuUzLNnUZccLDdbjb9ff-hg47alk9rJT-9bNYK_AwGaaGknvXgAgyMfkuo090qOjfEfTys",
+      });
       user = await User.findByIdAndUpdate(user.id, { token }, { new: true });
     } else {
       // Update the existing user's OTP
@@ -111,7 +123,11 @@ userController.post("/otp-verification", async (req, res) => {
 userController.post("/create-admin", async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ email: email, password: password, role: "admin" });
+    const user = await User.findOne({
+      email: email,
+      password: password,
+      role: "admin",
+    });
     if (user) {
       return sendResponse(res, 422, "Failed", {
         message: "Admin already exists",
@@ -135,13 +151,24 @@ userController.post("/create-admin", async (req, res) => {
 userController.post("/admin-login", async (req, res) => {
   try {
     const { email, password } = req.body;
-    let user = await User.findOne({ email: email, password: password, role: "admin" });
+    let user = await User.findOne({
+      email: email,
+      password: password,
+      role: "admin",
+    });
     if (user) {
       // Generate JWT token for the new user
-      const token = jwt.sign({ userId: user._id, phoneNumber: user.phoneNumber }, process.env.JWT_KEY);
+      const token = jwt.sign(
+        { userId: user._id, phoneNumber: user.phoneNumber },
+        process.env.JWT_KEY
+      );
       // Store the token in the user object or return it in the response
       user.token = token;
-      user = await User.findByIdAndUpdate(user.id, { token , deviceId: req?.body?.deviceId }, { new: true });
+      user = await User.findByIdAndUpdate(
+        user.id,
+        { token, deviceId: req?.body?.deviceId },
+        { new: true }
+      );
       return sendResponse(res, 200, "Success", {
         message: "Admin logged in successfully",
         data: user,
@@ -176,7 +203,9 @@ userController.post("/add-wish-list", async (req, res) => {
     const validModelTypes = ["service", "repair", "installation"];
     if (!validModelTypes.includes(modelType)) {
       return sendResponse(res, 400, "Failed", {
-        message: `Invalid modelType. Valid types are: ${validModelTypes.join(", ")}`,
+        message: `Invalid modelType. Valid types are: ${validModelTypes.join(
+          ", "
+        )}`,
         statusCode: 400,
       });
     }
@@ -192,7 +221,8 @@ userController.post("/add-wish-list", async (req, res) => {
 
     // Check if the item is already in the wish list
     const itemIndex = user.wishList.findIndex(
-      (item) => item.modelId.toString() === modelId && item.modelType === modelType
+      (item) =>
+        item.modelId.toString() === modelId && item.modelType === modelType
     );
 
     if (itemIndex !== -1) {
@@ -271,7 +301,7 @@ userController.get("/get-wish-list/:userId", async (req, res) => {
                   rate: populatedItem.rate,
                   distance: populatedItem.distance,
                   status: populatedItem.status,
-                  isFavourite:true
+                  isFavourite: true,
                 }
               : null,
           };
@@ -309,20 +339,33 @@ userController.put("/update", upload.single("image"), async (req, res) => {
     }
     // Handle image upload if a new image is provided
     if (req.file) {
-      let image = await cloudinary.uploader.upload(req.file.path, function (err, result) {
-        if (err) {
-          return err;
-        } else {
-          return result;
+      let image = await cloudinary.uploader.upload(
+        req.file.path,
+        function (err, result) {
+          if (err) {
+            return err;
+          } else {
+            return result;
+          }
         }
-      });
+      );
       updatedData = { ...req.body, image: image.url };
     }
     // Update the user in the database
     const updatedUserData = await User.findByIdAndUpdate(id, updatedData, {
       new: true, // Return the updated document
     });
-
+    sendNotification({
+      icon: `${updatedUserData.profilePic}`,
+      title: `${updatedUserData.firstName} has completed the profile`,
+      subTitle: `${updatedUserData.firstName} has completed the profile`,
+      notifyUserId: "Admin",
+      category: "User",
+      subCategory: "Registration",
+      notifyUser: "Admin",
+      fcmToken:
+        "fCBfyfuaAl0FeG6e93S5mc:APA91bEWMG6tNIshaebx07iOP3lD537F-QOdgn_Wcl7unSBhjeuUzLNnUZccLDdbjb9ff-hg47alk9rJT-9bNYK_AwGaaGknvXgAgyMfkuo090qOjfEfTys",
+    });
     sendResponse(res, 200, "Success", {
       message: "User updated successfully!",
       data: updatedUserData,
@@ -337,7 +380,14 @@ userController.put("/update", upload.single("image"), async (req, res) => {
 });
 userController.post("/list", async (req, res) => {
   try {
-    const { searchKey = "", status, pageNo = 1, pageCount = 10, sortByField, sortByOrder } = req.body;
+    const {
+      searchKey = "",
+      status,
+      pageNo = 1,
+      pageCount = 10,
+      sortByField,
+      sortByOrder,
+    } = req.body;
     const query = {};
     if (status) query.profileStatus = status;
     if (searchKey) query.firstName = { $regex: searchKey, $options: "i" };
@@ -350,7 +400,9 @@ userController.post("/list", async (req, res) => {
       .skip(parseInt(pageNo - 1) * parseInt(pageCount));
 
     const totalCount = await User.countDocuments({});
-    const activeCount = await User.countDocuments({ profileStatus: "completed" });
+    const activeCount = await User.countDocuments({
+      profileStatus: "completed",
+    });
 
     // Define the model mapping for dynamic population
     const modelMapping = {
@@ -387,14 +439,23 @@ userController.post("/list", async (req, res) => {
         );
         const bookingList = await Booking.find({ userId: user?._id });
         const addressList = await Address.find({ userId: user?._id });
-        return { ...user.toObject(), wishList: populatedWishList, bookingList, addressList };
+        return {
+          ...user.toObject(),
+          wishList: populatedWishList,
+          bookingList,
+          addressList,
+        };
       })
     );
 
     sendResponse(res, 200, "Success", {
       message: "User list retrieved successfully!",
       data: updatedUserList,
-      documentCount: { totalCount, activeCount, inactiveCount: totalCount - activeCount },
+      documentCount: {
+        totalCount,
+        activeCount,
+        inactiveCount: totalCount - activeCount,
+      },
       statusCode: 200,
     });
   } catch (error) {
@@ -519,7 +580,7 @@ userController.get("/dashboard-details", async (req, res) => {
       bookingsLast15Days.push({
         date: formattedDate, // "1st Jan"
         noOfBookings: bookingData ? bookingData.noOfBookings : 0,
-        mongoDate:mongoDate
+        mongoDate: mongoDate,
       });
     }
     const support = await Support.findOne({});
@@ -528,8 +589,17 @@ userController.get("/dashboard-details", async (req, res) => {
       data: {
         users: { totalUser, activeUser, inactiveUser },
         categories: { totalCategory, activeCategory, inactiveCategory },
-        subCategories: { totalSubCategory, activeSubCategory, inactiveSubCategory },
-        bookings: { totalBooking, activeBooking, bookingRequest, bookingCompleted },
+        subCategories: {
+          totalSubCategory,
+          activeSubCategory,
+          inactiveSubCategory,
+        },
+        bookings: {
+          totalBooking,
+          activeBooking,
+          bookingRequest,
+          bookingCompleted,
+        },
         services: { totalServices, totalRepair, totalInstallation },
         support: support,
         last15DaysBookings: bookingsLast15Days, // Reverse for ascending order

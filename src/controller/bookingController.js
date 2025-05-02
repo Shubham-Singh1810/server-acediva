@@ -12,6 +12,28 @@ const User = require("../model/user.Schema");
 bookingController.post("/create", async (req, res) => {
   try {
     const bookingCreated = await Booking.create(req.body);
+    sendNotification({
+      icon: `${bookingCreated?.userId.profilePic}`,
+      title: `A new booking has been placed`,
+      subTitle: `${bookingCreated?.userId?.first} has booked a service for ${bookingCreated?.serviceData?.name}`,
+      notifyUserId:"Admin",
+      category: "Booking",
+      subCategory: "Created",
+      notifyUser: "Admin",
+      fcmToken:
+        "fCBfyfuaAl0FeG6e93S5mc:APA91bEWMG6tNIshaebx07iOP3lD537F-QOdgn_Wcl7unSBhjeuUzLNnUZccLDdbjb9ff-hg47alk9rJT-9bNYK_AwGaaGknvXgAgyMfkuo090qOjfEfTys",
+    });
+    sendNotification({
+      icon: `${bookingCreated?.serviceData?.banner}`,
+      title: `Your booking has been placed`,
+      subTitle: `Your booking has booked placed for ${bookingCreated?.serviceData?.name}`,
+      notifyUserId:`${bookingCreated?.userId?._id}`,
+      category: "Booking",
+      subCategory: "Created",
+      notifyUser: "User",
+      fcmToken:
+        "fCBfyfuaAl0FeG6e93S5mc:APA91bEWMG6tNIshaebx07iOP3lD537F-QOdgn_Wcl7unSBhjeuUzLNnUZccLDdbjb9ff-hg47alk9rJT-9bNYK_AwGaaGknvXgAgyMfkuo090qOjfEfTys",
+    });
     sendResponse(res, 200, "Success", {
       message: "Booking created successfully!",
       data: bookingCreated,
@@ -143,6 +165,18 @@ bookingController.get("/cancel/:id", async (req, res) => {
           new: true, // Return the updated document
         }
       );
+      sendNotification({
+        icon: `${updatedBooking?.userId?.profilePic}`,
+        title: `A booking has been cancelled.`,
+        subTitle: `${updatedBooking?.userId?.firstName} has canceled booking for service ${updatedBooking?.serviceData?.name}.`,
+        notifyUserId:`Admin`,
+        category: "Booking",
+        subCategory: "Canceled",
+        notifyUser: "Admin",
+        fcmToken:
+          "fCBfyfuaAl0FeG6e93S5mc:APA91bEWMG6tNIshaebx07iOP3lD537F-QOdgn_Wcl7unSBhjeuUzLNnUZccLDdbjb9ff-hg47alk9rJT-9bNYK_AwGaaGknvXgAgyMfkuo090qOjfEfTys",
+      });
+      
       sendResponse(res, 200, "Success", {
         message: "Booking cancel successfully!",
         data: updatedBooking,
@@ -159,6 +193,17 @@ bookingController.get("/cancel/:id", async (req, res) => {
           new: true, // Return the updated document
         }
       );
+      sendNotification({
+        icon: `${updatedBooking?.serviceData?.banner}`,
+        title: `Your booking has been marked as canceled`,
+        subTitle: `${updatedBooking?.serviceData?.name} has been marked as cenceled and we will processed your refund shortly.`,
+        notifyUserId:`${updatedBooking?.userId?._id}`,
+        category: "Booking",
+        subCategory: "Canceled",
+        notifyUser: "User",
+        fcmToken:
+          "fCBfyfuaAl0FeG6e93S5mc:APA91bEWMG6tNIshaebx07iOP3lD537F-QOdgn_Wcl7unSBhjeuUzLNnUZccLDdbjb9ff-hg47alk9rJT-9bNYK_AwGaaGknvXgAgyMfkuo090qOjfEfTys",
+      });
       sendResponse(res, 200, "Success", {
         message: "Booking cancel successfully, you will get your refund within 24 hours!",
         data: updatedBooking,
@@ -191,6 +236,28 @@ bookingController.post("/assign-vender/:id", async (req, res) => {
         new: true, 
       }
     );
+    sendNotification({
+      icon: `${updatedBooking?.serviceData?.banner}`,
+      title: `A vendor has been assigned for the booking ${updatedBooking?.serviceData?.name}`,
+      subTitle: `${updatedBooking?.venderId?.firstName} will has been assigned for your booking`,
+      notifyUserId:`${updatedBooking?.userId?._id}`,
+      category: "Booking",
+      subCategory: "Vender Assigned",
+      notifyUser: "User",
+      fcmToken:
+        "fCBfyfuaAl0FeG6e93S5mc:APA91bEWMG6tNIshaebx07iOP3lD537F-QOdgn_Wcl7unSBhjeuUzLNnUZccLDdbjb9ff-hg47alk9rJT-9bNYK_AwGaaGknvXgAgyMfkuo090qOjfEfTys",
+    });
+    sendNotification({
+      icon: `${updatedBooking?.serviceData?.banner}`,
+      title: `A new booking has been assigned to you.`,
+      subTitle: `A new booking has been assigned to you.`,
+      notifyUserId:`${updatedBooking?.venderId?._id}`,
+      category: "Booking Assigned",
+      subCategory: "Vender Assigned",
+      notifyUser: "Vendor",
+      fcmToken:
+        "fCBfyfuaAl0FeG6e93S5mc:APA91bEWMG6tNIshaebx07iOP3lD537F-QOdgn_Wcl7unSBhjeuUzLNnUZccLDdbjb9ff-hg47alk9rJT-9bNYK_AwGaaGknvXgAgyMfkuo090qOjfEfTys",
+    });
     sendResponse(res, 200, "Success", {
       message: "Vender assigned successfully!",
       data: updatedBooking,
@@ -222,6 +289,17 @@ bookingController.post("/mark-done/:id", async (req, res) => {
         new: true, 
       }
     );
+    sendNotification({
+      icon: `${updatedBooking?.serviceData?.banner}`,
+      title: `${updatedBooking?.serviceData?.name} has been marked as done.`,
+      subTitle: `${updatedBooking?.serviceData?.name} has been marked as done. Hope you have liked the service`,
+      notifyUserId:`${updatedBooking?.venderId?._id}`,
+      category: "Booking",
+      subCategory: "Marked Done",
+      notifyUser: "User",
+      fcmToken:
+        "fCBfyfuaAl0FeG6e93S5mc:APA91bEWMG6tNIshaebx07iOP3lD537F-QOdgn_Wcl7unSBhjeuUzLNnUZccLDdbjb9ff-hg47alk9rJT-9bNYK_AwGaaGknvXgAgyMfkuo090qOjfEfTys",
+    });
     sendResponse(res, 200, "Success", {
       message: "Booking marked as completed",
       data: updatedBooking,
@@ -253,6 +331,17 @@ bookingController.post("/cancel/:id", async (req, res) => {
         new: true, 
       }
     );
+    sendNotification({
+      icon: `${updatedBooking?.serviceData?.banner}`,
+      title: `${updatedBooking?.venderId?.firstNmae} has canceled the booking.`,
+      subTitle: `Giving the reason as "${updatedBooking?.cancelationReason}"`,
+      notifyUserId:`Admin`,
+      category: "Booking",
+      subCategory: "Canceled",
+      notifyUser: "Admin",
+      fcmToken:
+        "fCBfyfuaAl0FeG6e93S5mc:APA91bEWMG6tNIshaebx07iOP3lD537F-QOdgn_Wcl7unSBhjeuUzLNnUZccLDdbjb9ff-hg47alk9rJT-9bNYK_AwGaaGknvXgAgyMfkuo090qOjfEfTys",
+    });
     sendResponse(res, 200, "Success", {
       message: "Booking marked as completed",
       data: updatedBooking,

@@ -7,7 +7,6 @@ if (!admin.apps.length) {
     credential: admin.credential.cert(serviceAccount),
   });
 }
-
 exports.sendNotification = async (data) => {
   try {
     const notificationCreated = await Notification.create(data);
