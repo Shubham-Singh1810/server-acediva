@@ -15,12 +15,16 @@ notificationController.post("/list", async (req, res) => {
       category,
       notifyUser,
       isRead,
+      notifyUserId,
       pageNo = 1,
       pageCount = 10,
     } = req.body;
     const query = {};
     if(category){
       query.category = category
+    }
+    if(notifyUserId){
+      query.notifyUserId = notifyUserId
     }
     if(notifyUser){
       query.notifyUser = notifyUser
