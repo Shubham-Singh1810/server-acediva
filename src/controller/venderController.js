@@ -370,7 +370,7 @@ venderController.post("/my-booking/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const query = {};
-    if(bookingStatus != "all"){
+    if(req?.body?.bookingStatus != "all"){
       query.bookingStatus = req?.body?.bookingStatus
     }
     const bookingList = await Booking.find({ venderId: id, ...query});
