@@ -369,6 +369,10 @@ venderController.delete("/delete/:id", async (req, res) => {
 venderController.post("/my-booking/:id", async (req, res) => {
   try {
     const { id } = req.params;
+    const query = {};
+    if(bookingStatus != "all"){
+      query.bookingStatus = req?.body?.bookingStatus
+    }
     const bookingList = await Booking.find({ venderId: id, bookingStatus:req?.body?.bookingStatus});
     const updatedBookingList = await Promise.all(
       bookingList.map(async (v) => {
